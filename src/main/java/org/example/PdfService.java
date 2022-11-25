@@ -4,15 +4,14 @@ import com.itextpdf.io.font.FontConstants;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.color.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.List;
-import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.*;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Text;
+import org.w3c.dom.css.RGBColor;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,6 +62,46 @@ import java.util.ArrayList;
         }
     }
 
+     public void createPdfWithTableObject(String path, TablePdf table){
+         try{
+             Document doc = createPdfDoc(path);
+             float[] colWidth = {200f, 200f,200f};
+             int numberOfCol = colWidth.length;
+//             config of the table's columns. The number of col. is caculated by the number of ele in the colWidth array
+             Table tablePdfObj = new Table(colWidth);
+//             all that is rest to be done is adding Cells
+             String[] headers = table.getTitles();
+             String[][] rows = table.getRowsTables();
+             for (String title: headers){
+                 tablePdfObj.addCell(new Cell().add(title).setBold().setBackgroundColor(Color.PINK).setFontColor(Color.WHITE));
+             }
+             for (String line[]: rows){
+                 if (line.length == numberOfCol){
+                     for (String element : line){
+                         tablePdfObj.addCell(new Cell().add(element));
+                     }
+
+                 }
+                 else{
+                     int complete = numberOfCol - line.length;
+                     for (String element : line){
+                         tablePdfObj.addCell(new Cell().add(element));
+                     }
+                     for (int i=0; i< complete; i++){
+                         tablePdfObj.addCell(new Cell().add("-"));
+
+                     }
+                 }
+             }
+
+             doc.add(tablePdfObj);
+             closeDocument(doc);
+
+         } catch (FileNotFoundException e) {
+             throw new RuntimeException(e);
+         }
+     }
+
     public Paragraph applayFontToPara(Paragraph par, PdfFont pdfFont){
          return par.setFont(pdfFont);
     }
@@ -71,7 +110,7 @@ import java.util.ArrayList;
         try {
             Document doc = createPdfDoc(path);
             Paragraph paragraph = createParagraph(p, fontsize);
-            Paragraph p2 = new Paragraph("second").setFontColor(Color.DARK_GRAY);
+            Paragraph p2 = new Paragraph("hard coded para").setFontColor(new DeviceRgb(0,255,0));
 
             doc.add(paragraph);
             doc.add(p2);
@@ -139,14 +178,25 @@ import java.util.ArrayList;
     }
 
 
+
     public static void main(String[] args) throws FileNotFoundException {
+        PdfService service = new PdfService();
+//***************************************************
+
+//        create table
+        String[] titles = {"Coordinateur", "Chef de projet", "URC"};
+        String[][] data = {
+                {"Syvin Dupot", "Eren Woid", "Damien"},
+                {"one", "" , "two"}};
+        TablePdf tablepdf = new TablePdf(titles, data );
+//        service.createPdfWithTableObject("table2.pdf", tablepdf);
+//***************************************************
         ArrayList<String> arrayList = new ArrayList<String>();
         arrayList.add("First");
         arrayList.add("sEcond");
         arrayList.add("third");
         arrayList.add("4");
         arrayList.add("five");
-        PdfService service = new PdfService();
 //Font and Text
         Text etude = new Text("ETUDE4 (ET4) ");
         Text dates = new Text("du 01/07/2022 au 30/06/2023 sur ");
@@ -156,11 +206,16 @@ import java.util.ArrayList;
         textArry.add(dates);
         textArry.add(pat);
         Paragraph para = service.addTextToParagraph(textArry);
+
+
+        service.buildPdfWithImageAndPara("xxx.pdf", "25.11", 35, "img/pic.jpg");
 //        service.createPdfWithParagraph("with font.pdf", para);
+        //***************************************************
+
 //work with embd fonts
         PdfFont pdfFontmbd = service.createEmbdFont(font_emb);
         Paragraph paraWithFont = new Paragraph("let's test the new font");
-        service.createPdfWithParagraph("withEmbdFont.pdf", service.applayFontToPara(paraWithFont, pdfFontmbd));
+//        service.createPdfWithParagraph("withEmbdFont.pdf", service.applayFontToPara(paraWithFont, pdfFontmbd));
 //    service.buildPdfWithList("list.pdf", arrayList);
 //    service.buildPdfWithImageAndPara("imgPara2.pdf", "this is p", 25, "img/pic.jpg");
     }
