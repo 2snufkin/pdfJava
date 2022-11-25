@@ -7,6 +7,8 @@ import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.color.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.border.GrooveBorder;
 import com.itextpdf.layout.element.*;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -68,7 +70,9 @@ import java.util.ArrayList;
              float[] colWidth = {200f, 200f,200f};
              int numberOfCol = colWidth.length;
 //             config of the table's columns. The number of col. is caculated by the number of ele in the colWidth array
-             Table tablePdfObj = new Table(colWidth);
+             Border border = new GrooveBorder(new DeviceRgb(0,180,180),3f);
+//             Applying the border to the table
+             Table tablePdfObj = new Table(colWidth).setBorder(border);
 //             all that is rest to be done is adding Cells
              String[] headers = table.getTitles();
              String[][] rows = table.getRowsTables();
@@ -189,7 +193,7 @@ import java.util.ArrayList;
                 {"Syvin Dupot", "Eren Woid", "Damien"},
                 {"one", "" , "two"}};
         TablePdf tablepdf = new TablePdf(titles, data );
-//        service.createPdfWithTableObject("table2.pdf", tablepdf);
+        service.createPdfWithTableObject("table2.pdf", tablepdf);
 //***************************************************
         ArrayList<String> arrayList = new ArrayList<String>();
         arrayList.add("First");
