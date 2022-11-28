@@ -7,13 +7,12 @@ import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.color.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.GrooveBorder;
-import com.itextpdf.layout.element.*;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import org.w3c.dom.css.RGBColor;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.border.GrooveBorder;
+import com.itextpdf.layout.element.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -132,7 +131,7 @@ import java.util.ArrayList;
     }
 
     public Document createPdfDoc(String path_pdf) throws FileNotFoundException {
-        FilesMng.createAfile(path_pdf);
+//        FilesMng.createAfile(path_pdf);
         PdfWriter pdfWriter = new PdfWriter(path_pdf);
 //        create a pdf doc with no pages
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);

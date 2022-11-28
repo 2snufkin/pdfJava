@@ -2,6 +2,33 @@
 Wanna see the [source code](https://github.com/itext/itext7/tree/develop)
 Wanna know what are all the Border options? 
 
+## How To
+1. create a utility method that will serve you with every creation of pdf and that will return a document. This method
+will create a pdf filen with one page and document, to this document you will be able to add elements with the add()
+```java        
+    public Document createPdfDoc(String path_pdf) throws FileNotFoundException {
+        PdfWriter pdfWriter = new PdfWriter(path_pdf);
+//        create a pdf doc with no pages
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+//        add a page
+        pdfDocument.addNewPage();
+//       import com.itextpdf.layout.Document the document is where I will insert the text
+        Document document = new Document(pdfDocument);
+        return document;
+
+    }
+```
+2. save the return object in a variable
+3. Create the Elements you want to add to the pdf: Text, Paragraph, Table etc...
+4. Call the add() on this variable to add 
+```java         
+doc.add(paragraph);
+```
+3. You must call the close method when you have finished adding all the elements to the pdf, otherwise you won't be able
+4. to open it
+```java         
+doc.close();
+```
 ## Structure
 Paragraph Object vs Text Object? \
 paragraph act like block element and text act like inline element
