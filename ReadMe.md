@@ -1,6 +1,7 @@
 # ITEXT7: Java Library for creating pdf files
 Wanna see the [source code](https://github.com/itext/itext7/tree/develop)
-Wanna know what are all the Border options? 
+Wanna know what are all the Border options?  
+[Utube course](https://www.youtube.com/playlist?list=PLFh8wpMiEi8-Yo59DBCasuVi1M29kQrvn)
 
 ## How To
 1. create a utility method that will serve you with every creation of pdf and that will return a document. This method

@@ -1,14 +1,29 @@
 package org.example;
 
 import com.itextpdf.kernel.color.Color;
-import com.itextpdf.kernel.color.DeviceRgb;
-import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.GrooveBorder;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public   class PdfTools {
+
+    /**
+     * Create a pdf doc with one page and return the document
+     * @param path_pdf the path on your drive
+     * @return Document object
+     * @throws FileNotFoundException if the path is wrong, it must finish with *.pdf
+     */
+    public static Document createPdfDoc(String path_pdf) throws FileNotFoundException {
+
+        PdfWriter pdfWriter = new PdfWriter(path_pdf);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        pdfDocument.addNewPage();
+        return new Document(pdfDocument);
+    }
 
     /**
      * add all the items in an arrayList to a itext7 List that can be added to a pdf doc as unsorted list
@@ -18,7 +33,9 @@ public   class PdfTools {
     public static List addItemsToList(ArrayList<String> listItems){
         List listOfItems = new List();
         for (String ele: listItems) listOfItems.add(ele);
-        return listOfItems;
+//        attention , it will add also a space after the bullet point since I added a space
+        Text symbol = new Text("\u2022 ");
+        return listOfItems.setListSymbol(symbol);
     }
 
     /**
@@ -30,7 +47,7 @@ public   class PdfTools {
      */
     public static  Paragraph createH1(String title, String color) {
         Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(25f);
+        paragraph.setFontSize(25f).setBold();
         return applyColor(paragraph, color);
     }
 
@@ -43,7 +60,7 @@ public   class PdfTools {
      */
     public static  Paragraph createH2(String title, String color) {
         Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(22.5f);
+        paragraph.setFontSize(20f).setBold();
         return applyColor(paragraph, color);
     }
     /**
@@ -55,7 +72,7 @@ public   class PdfTools {
      */
     public static  Paragraph createH3(String title, String color) {
         Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(20f);
+        paragraph.setFontSize(17f).setBold();
         return applyColor(paragraph, color);
     }
 
@@ -73,14 +90,13 @@ public   class PdfTools {
         }
 
 //             config of the table's columns. The number of col. is caculated by the number of ele in the colWidth array
-        Border border = new GrooveBorder(new DeviceRgb(0, 180, 180), 3f);
 //             Applying the border to the table
-        Table tablePdfObj = new Table(colWidth).setBorder(border);
+        Table tablePdfObj = new Table(colWidth);
 //             all that is rest to be done is adding Cells
         String[] headers = table.getTitles();
         String[][] rows = table.getRowsTables();
         for (String title : headers) {
-            tablePdfObj.addCell(new Cell().add(title).setBold().setBackgroundColor(Color.PINK).setFontColor(Color.WHITE));
+            tablePdfObj.addCell(new Cell().add(title).setBold());
         }
         for (String line[] : rows) {
             if (line.length == numberOfCol) {
