@@ -62,6 +62,10 @@ List can be unsorted and by default tey will have a - sign before each item
 ### customizing the list symbol
 As said, the default symbol is `-`. I change it:
 1. Create a Text object and pass the [unicode](https://www.rapidtables.com/code/text/unicode-characters.html) code of the symbol.
+```java
+Text symbol = new Text("\u2022 ");
+
+```
 2. apply the `.setListSymbol()` to the list you have created and pass the text object as an argument.\
 If you have a font that contains only symbol, you can use it
 ```java
