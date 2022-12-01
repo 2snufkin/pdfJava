@@ -1,38 +1,56 @@
 package org.example;
 
+import java.util.List;
+
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.color.DeviceRgb;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.border.SolidBorder;
 import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.VerticalAlignment;
 
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-public   class PdfTools {
+public class PdfTools {
+    public final static DeviceRgb BLUE = new DeviceRgb(25, 118, 210);
+    public static final DeviceRgb RED = new DeviceRgb(221, 55, 5);
+
 
     /**
      * Create a pdf doc with one page and return the document
+     *
      * @param path_pdf the path on your drive
      * @return Document object
      * @throws FileNotFoundException if the path is wrong, it must finish with *.pdf
      */
-    public static Document createPdfDoc(String path_pdf) throws FileNotFoundException {
+    public static Document createA4PdfDoc(String path_pdf) throws FileNotFoundException {
 
         PdfWriter pdfWriter = new PdfWriter(path_pdf);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
         pdfDocument.addNewPage();
-        return new Document(pdfDocument);
+        return new Document(pdfDocument, PageSize.A4);
     }
 
     /**
-     * add all the items in an arrayList to a itext7 List that can be added to a pdf doc as unsorted list
+     * add all the items in an arrayList to an itext7 List that can be added to a pdf doc as unsorted list
+     *
      * @param listItems ArrayList of type String
      * @return itext7 List
      */
-    public static List addItemsToList(ArrayList<String> listItems){
-        List listOfItems = new List();
-        for (String ele: listItems) listOfItems.add(ele);
+    public static com.itextpdf.layout.element.List addItemsToList(ArrayList<String> listItems) {
+        com.itextpdf.layout.element.List listOfItems = new com.itextpdf.layout.element.List();
+        for (String ele : listItems) listOfItems.add(ele);
 //        attention , it will add also a space after the bullet point since I added a space
         Text symbol = new Text("\u2022 ");
         return listOfItems.setListSymbol(symbol);
@@ -42,114 +60,163 @@ public   class PdfTools {
      * create a paragraph that serves as the main title
      *
      * @param title the string
-     * @param color the color of the paragraph. blue or black
      * @return the paragraph
      */
-    public static  Paragraph createH1(String title, String color) {
-        Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(25f).setBold();
-        return applyColor(paragraph, color);
+    public static Cell createNewSection(String title) {
+        Cell cell = new Cell().setHeight(14f).setBackgroundColor(BLUE).setMarginBottom(10f).setMarginTop(10f);
+        Paragraph text = new Paragraph(title.toUpperCase()).setBold().setFontColor(Color.WHITE).setFontSize(10f);
+        return cell.add(text);
+    }
+
+    public static Cell createDivCell(String title, ArrayList<String> listItems){
+        Cell cell = new Cell();
+        Paragraph titlePara = PdfTools.createTitle(title);
+        com.itextpdf.layout.element.List listItemsPdf = PdfTools.addItemsToList(listItems);
+        cell.add(titlePara).add(listItemsPdf);
+        cell.setBorder(Border.NO_BORDER);
+        return cell;
+    }
+
+    public static Cell createDivCellWithBorder(String title, ArrayList<String> listItems){
+        Cell cell = new Cell() ;
+        Paragraph titlePara = PdfTools.createTitle(title);
+        com.itextpdf.layout.element.List listItemsPdf = PdfTools.addItemsToList(listItems);
+        cell.add(titlePara).add(listItemsPdf);
+        return cell.setBorder(new SolidBorder(1));
+    }
+
+    public static Cell createDivCell(String title, String paragraph){
+        Cell cellPara = new Cell();
+        cellPara.setBorder(Border.NO_BORDER);
+        Paragraph paragraphToAdd = new Paragraph(paragraph);
+        Paragraph titlePara = PdfTools.createTitle(title);
+        cellPara.add(titlePara).add(paragraphToAdd);
+        return cellPara;
+    }
+
+    public static Image createWatermark(String path) {
+        try {
+            ImageData img = ImageDataFactory.create(path);
+            Image image = new Image(img);
+            return image.setFixedPosition(0, 0).setOpacity(0.3f);
+
+        } catch (MalformedURLException e) {
+            System.out.println(e);
+            return null;
+        }
+
+
+    }
+    public static Image createLogo(String path){
+        try {
+            ImageData img = ImageDataFactory.create(path);
+            Image image = new Image(img);
+            image.setFixedPosition(PageSize.A4.getWidth() - image.getImageScaledWidth(), PageSize.A4.getHeight() - image.getImageScaledHeight());
+            return image;
+
+        } catch (MalformedURLException e) {
+            System.out.println(e);
+            return null;
+        }
+    }
+
+    public static Cell createSubSection(String title) {
+        return new Cell().setBackgroundColor(RED).add(title).setFontColor(Color.WHITE);
     }
 
     /**
      * create a paragraph that serves as a subtitle to the main title
      *
      * @param title the string
-     * @param color the color of the paragraph. blue or black
      * @return the paragraph
      */
-    public static  Paragraph createH2(String title, String color) {
+    public static Paragraph createTitle(String title) {
         Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(20f).setBold();
-        return applyColor(paragraph, color);
+        paragraph.setFontSize(11f).setBold().setUnderline(BLUE, .75f, 0, 0, -1 / 8f, PdfCanvasConstants.LineCapStyle.BUTT)
+                .setFontColor(BLUE);
+        return paragraph;
     }
-    /**
-     * create a paragraph that serves as a subtitle to the subtitle
-     *
-     * @param title the string
-     * @param color the color of the paragraph. blue or black
-     * @return the paragraph
-     */
-    public static  Paragraph createH3(String title, String color) {
-        Paragraph paragraph = new Paragraph(title);
-        paragraph.setFontSize(17f).setBold();
-        return applyColor(paragraph, color);
-    }
+
 
     /**
      * convert a TablePdf object that contains the headers and the data to a iText7 Table
      *
-     * @param table TablePdf Object (not a native object)
+     * @param tableModel TablePdf Object (not a native object)
      * @return Table. to add it to the doc. call the add() method
      */
-    public static  Table createTableObject(TablePdf table) {
-        int numberOfCol = table.getTitles().length;
+    public static Table createTableFromModel(TableModel tableModel) {
+        List<String> listTitles = new ArrayList<>(tableModel.getTitles());
+        int numberOfCol = listTitles.size();
         float[] colWidth = new float[numberOfCol];
         for (int i = 0; i < numberOfCol; i++) {
             colWidth[i] = 200f;
         }
-
-//             config of the table's columns. The number of col. is caculated by the number of ele in the colWidth array
-//             Applying the border to the table
+//      config of the table's columns. The number of col. is calculated by the number of ele in the colWidth array
         Table tablePdfObj = new Table(colWidth);
-//             all that is rest to be done is adding Cells
-        String[] headers = table.getTitles();
-        String[][] rows = table.getRowsTables();
-        for (String title : headers) {
+//      all that is rest to be done is adding Cells
+//      adding the first line of the table == headers
+        for (String title : listTitles) {
             tablePdfObj.addCell(new Cell().add(title).setBold());
         }
-        for (String line[] : rows) {
-            if (line.length == numberOfCol) {
-                for (String element : line) {
-                    tablePdfObj.addCell(new Cell().add(element));
-                }
-
-            } else {
-                int complete = numberOfCol - line.length;
-                for (String element : line) {
-                    tablePdfObj.addCell(new Cell().add(element));
-                }
-                for (int i = 0; i < complete; i++) {
-                    tablePdfObj.addCell(new Cell().add("-"));
-
-                }
-            }
+//        lopping the listTitles of list and adding to the table
+        List<ArrayList<String>> listOfList = new ArrayList<>(tableModel.getColumnValues());
+        for (ArrayList<String> listcol : listOfList){
+            com.itextpdf.layout.element.List listCollabo = addItemsToList(listcol);
+            tablePdfObj.addCell(new Cell().add(listCollabo));
         }
         return tablePdfObj;
-
     }
 
     /**
+     * Create a table with x cells
+     * @param listValues
+     * @return a Table
+     */
+    public static Table createTableOneRow(ArrayList<String> listValues){
+//        create a Table object and pass to its constructor the width of each col. as an arg
+        int size = listValues.size();
+        float width =   (PageSize.A4.getWidth()/3)  ;
+        float[] widthtotal = new float[size];
+        for (int i = 0; i < widthtotal.length ; i++){
+            widthtotal[i] = width;
+        }
+        Table table = new Table(widthtotal);
+//        create Cell Object
+        for (String value : listValues){
+            table.addCell(new Cell().add(value));
+        }
+        return table.setBorder(Border.NO_BORDER);
+
+    }
+
+//    https://kb.itextpdf.com/home/it7kb/examples/page-events-for-headers-and-footers
+    public static void addFooter(Table table, PdfDocument pdfDoc,   Document doc){
+        PageSize ps = pdfDoc.getDefaultPageSize();
+        for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
+            Rectangle pageSize = pdfDoc.getPage(i).getPageSize();
+            float x = pageSize.getWidth() / 2;
+            float y = pageSize.getBottom() + 20;
+            table.setFixedPosition(doc.getLeftMargin(), doc.getBottomMargin(), ps.getWidth() - doc.getLeftMargin() - doc.getRightMargin());
+            doc.getPdfDocument().;
+        }
+    }
+
+
+    /**
      * Create a paragraph in this format <bold>title : </bold> <p> description</p>
-     * @param title the title
+     *
+     * @param title       the title
      * @param description the description
      * @return a Paragraph
      */
-    public static   Paragraph createTitleDescription(String title, String description){
-        Text titleText  = new Text(title + " : ").setBold();
-        Text descText  = new Text(description + ".");
+    public static Paragraph createTitleDescription(String title, String description) {
+        Text titleText = new Text(title + " : ").setBold();
+        Text descText = new Text(description + ".");
         Paragraph paragraph = new Paragraph();
         paragraph.add(titleText);
         paragraph.add(descText);
         return paragraph;
     }
 
-    public static  Paragraph applyColor(Paragraph paragraph, String color) {
-        String colorInput = color.toLowerCase();
-        switch (colorInput) {
-            case "black": {
-                paragraph.setFontColor(Color.BLACK);
-                break;
-            }
-            case "blue": {
-                paragraph.setFontColor(Color.BLUE);
-                break;
-            }
-            default:
-                paragraph.setFontColor(Color.BLACK);
-
-        }
-        return paragraph;
-    }
 
 }
