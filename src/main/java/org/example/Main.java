@@ -1,9 +1,12 @@
 package org.example;
 
-import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.events.PdfDocumentEvent;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.border.GrooveBorder;
+import com.itextpdf.layout.border.SolidBorder;
 import com.itextpdf.layout.element.*;
 
 import java.io.FileNotFoundException;
@@ -15,8 +18,11 @@ import static java.util.stream.Collectors.toCollection;
 
 public class Main {
     public static void main(String[] args) {
+
+
+//        TODO set font
 //        MISE eN PLACE
-        String PATH = "C:\\Tech\\code\\Learn\\pdf\\test.pdf";
+        String PATH = "C:\\Users\\Pini\\IdeaProjects\\pdfJava\\test.pdf";
         String sectionDetails = "Détail de l’étude";
         String etudeName = "Hibiscus(HUB)";
         String donnesCliniqueT = "Données cliniques";
@@ -30,7 +36,7 @@ public class Main {
         ArrayList<String> maladiesList = new ArrayList<>();
         maladiesList.add("F40- f48 : troubles névrotiques, troubles liés à des facteurs de stress et troubles somatoformes");
         maladiesList.add("F35- f18 : troubles névrotiques");
-        java.util.List<String> listCollection = Stream.generate(() -> "Collection").limit(6).collect(toCollection(ArrayList::new));
+        java.util.List<String> listCollection = Stream.generate(() -> "Collection").limit(3).collect(toCollection(ArrayList::new));
         ArrayList<String> arraylistCollection = new ArrayList<>(listCollection.size());
         arraylistCollection.addAll(listCollection);
         String[] titles = {"Coordinateur", "Chef de project", "URC"};
@@ -59,31 +65,40 @@ public class Main {
 
 //        pdf creation
         try {
+
             PdfWriter pdfWriter = new PdfWriter(PATH);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
             pdfDocument.addNewPage();
-
-            Document doc = new Document(pdfDocument, PageSize.A4).setFontSize(10f);
+            PageXofY event = new PageXofY(pdfDocument);
+            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, event);
+            Document doc = PdfTools.createA4PdfDoc(PATH, 10f);
 //  **********************************ETUDE  details section******************************************
-            Cell cell = PdfTools.createNewSection(sectionDetails);
+            Table cell = PdfTools.createSection(sectionDetails, true, false);
 
-            Image watermark = PdfTools.createLogo("C:\\Tech\\code\\Learn\\pdf\\img\\logo_gatsby.png");
-            doc.add(watermark);
+//            Image watermark = PdfTools.createLogo("C:\\Tech\\code\\Learn\\pdf\\img\\logo_gatsby.png");
+//            doc.add(watermark);
             doc.add(cell);
 //          General details
             Paragraph general = PdfTools.createTitleDescription(etudeName, detailsDate);
             doc.add(general);
 //          Donne clinique title
-            Cell donneCliniique = PdfTools.createDivCell(donnesCliniqueT, donnescliniquesData);
+            Paragraph donneCliniique = PdfTools.createTitleDescription(donnesCliniqueT, "oui");
             doc.add(donneCliniique);
+
+            //Complem
+            Cell donneComp= PdfTools.createDivCell("Complém", donnescliniquesData);
+            doc.add(donneComp);
+
 //          Maladies
             Cell maladiesCell = PdfTools.createDivCell(maladiesTitle, maladiesList);
             doc.add(maladiesCell);
+
+
 //          Collection
             Cell collectionCell = PdfTools.createDivCell(collectionTitle, arraylistCollection);
             doc.add(collectionCell);
 //  **********************************PROMOTION  section******************************************
-            Cell promotion = PdfTools.createNewSection(promotionTitle);
+            Table promotion = PdfTools.createSection(promotionTitle, true, true);
             doc.add(promotion);
 
             Table table = PdfTools.createTableFromModel(tableModel);
@@ -97,19 +112,27 @@ public class Main {
             Cell autreInfoCell = PdfTools.createDivCell("Autres informations", donnescliniquesData);
 
 //  **********************************SITES INVISTE  section******************************************
-            doc.add(PdfTools.createNewSection("Sites Inviste"));
-            doc.add(PdfTools.createSubSection("01: CH bress"));
-            doc.add(PdfTools.createDivCellWithBorder("Gynécologie Obstétrique".toUpperCase(), listCoordin));
-            doc.add(PdfTools.createDivCellWithBorder("Gynécologie Non-Obstétrique".toUpperCase(), listCoordin));
-            doc.add(PdfTools.createSubSection("01: CH Lyon"));
-            doc.add(PdfTools.createDivCellWithBorder("Gynécologie Obstétrique".toUpperCase(), listCoordin));
-            doc.add(PdfTools.createDivCellWithBorder("Gynécologie Non-Obstétrique".toUpperCase(), listCoordin));
-
+            doc.add(PdfTools.createSection("Sites Inviste", true, false));
+            doc.add(PdfTools.createSection("01: CH bress", false, false));
+            doc.add(PdfTools.createDivCell("Gynécologie Obstétrique", listCoordin));
+            doc.add(PdfTools.createDivCell("Gynécologie Non-Obstétrique", listCoordin));
+            doc.add(PdfTools.createSection("01: CH Lyon", false, false));
+            doc.add(PdfTools.createDivCell("Gynécologie Obstétrique", listCoordin));
+            doc.add(PdfTools.createDivCell("Gynécologie Non-Obstétrique", listCoordin));
+            Border border = new SolidBorder(1);
+            float widthTable[] = {200f};
+            Table tbl = new Table(widthTable);
+            tbl.addCell(new Cell().setBorder(border));
+            doc.add(tbl);
 
             Table tableFooter = PdfTools.createTableOneRow(footer);
-            PdfTools.addFooter(tableFooter, pdfDocument , doc );
+            Paragraph p = new Paragraph()
+            PdfTools.addFooter(tableFooter, p
+                    dfDocument , doc );
 
 //            add section sites invest
+//            event.writeTotal(pdfDocument);
+
             doc.close();
 
 //            add semi title

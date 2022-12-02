@@ -74,6 +74,7 @@ Text text = new Text(<a letter>).setFont(pdfFont);
 ```
 then follow step 2.
 ## Tabels
+
 you create a table object once and that you add cells. cells are added from left to right
 
 1. create a Table object and pass to its constructor the width of each col. as an arg
@@ -81,12 +82,15 @@ you create a table object once and that you add cells. cells are added from left
 3. on the Cell object call the add method and add a string
 4. call the `.addCell()` on the table object and pass the Cell object as arg
 
-### Add Border to table
+### Add Border to table/cell
+you can fill a cell without an attched table, but you can't add border to a cell that it's not attached to a table
+technically it's possible, but it won't display the border
 1. Create a Border object
 ``Border borderObject = new GrooveBorder(<width>);``
 2. Apply the `.setBorder(borderObject)` to the element you want to border (a cell, a table)
 
 ### Nesting inside a cell
+
 1. Image: the image should fit and be small otherwise it 
 can raise an exception.
 2. It's done by creating the mini/nested table and adding it to a cell
@@ -96,3 +100,46 @@ can raise an exception.
 ![Row / Column span](img/span.png)\
 To create the row/coulmns span one need just to pass the span values (int) to the cell constructor\
 ``new Cell(<row span>, <col span>)``
+
+## EventHandeler
+1. Create a new class and implement the IEventHandler
+ ```java
+protected class Header implements IEventHandler {
+```
+2. Use the constructor to get input
+```java
+    public Header(String header) {
+        this.header = header;
+    }
+```
+3. Override the handleEvent, you will get access to the PdfDocument, implement the business logic
+```java
+@Override
+    public void handleEvent(Event event) {
+        PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
+        PdfDocument pdf = docEvent.getDocument();
+        PdfPage page = docEvent.getPage();
+        if (pdf.getPageNumber(page) == 1) return;
+        Rectangle pageSize = page.getPageSize();
+        PdfCanvas pdfCanvas = new PdfCanvas(
+            page.getLastContentStream(), page.getResources(), pdf);
+        Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+        canvas.showTextAligned(header,
+            pageSize.getWidth() / 2,
+            pageSize.getTop() - 30, TextAlignment.CENTER);
+    }
+```
+4. invoke the method addEventHandler(<type of event>, <the eventobject>) on the PdfDocument
+the idea is to pass to this function (when, what)
+```java
+PdfDocument pdf = new PdfDocument(new PdfWriter(dest));
+pdf.addEventHandler(PdfDocumentEvent.START_PAGE,
+    new Header("The Strange Case of Dr. Jekyll and Mr. Hyde"));
+```
+
+ 
+### Types of triggered events
+1. START_PAGE: a new page is started
+2. END_PAGE: before a new page is started
+3. INSERT_PAGE: when a page is inserted 
+4. REMOVE_PAGE: when a page is removed
