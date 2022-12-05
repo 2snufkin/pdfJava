@@ -107,7 +107,7 @@ public class Main {
 
 
             Table tableFooter = PdfTools.createTableOneRow(footer);
-            PdfTools.addFooter(tableFooter, pdfDocument , doc );
+//            PdfTools.addFooter(tableFooter, pdfDocument , doc );
 
 //            add section sites invest
             doc.close();
