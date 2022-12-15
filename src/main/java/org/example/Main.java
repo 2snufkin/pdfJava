@@ -5,9 +5,11 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.GrooveBorder;
 import com.itextpdf.layout.border.SolidBorder;
-import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -68,11 +70,18 @@ public class Main {
 
             PdfWriter pdfWriter = new PdfWriter(PATH);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-            pdfDocument.addNewPage();
-            PageXofY event = new PageXofY(pdfDocument);
-            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, event);
-            Document doc = PdfTools.createA4PdfDoc(PATH, 10f);
+            Header headerEvent =     new Header("The Strange Case of Dr. Jekyll and Mr. Hyde");
+            PageXofY pageNo =     new PageXofY(pdfDocument);
+            pdfDocument.addEventHandler(PdfDocumentEvent.START_PAGE, headerEvent);
+            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, pageNo);
+            Document doc = new Document(pdfDocument);
+
+
 //  **********************************ETUDE  details section******************************************
+
+
+
+
             Table cell = PdfTools.createSection(sectionDetails, true, false);
 
 //            Image watermark = PdfTools.createLogo("C:\\Tech\\code\\Learn\\pdf\\img\\logo_gatsby.png");
@@ -84,7 +93,7 @@ public class Main {
 //          Donne clinique title
             Paragraph donneCliniique = PdfTools.createTitleDescription(donnesCliniqueT, "oui");
             doc.add(donneCliniique);
-
+            doc.add(new AreaBreak());
             //Complem
             Cell donneComp= PdfTools.createDivCell("Complém", donnescliniquesData);
             doc.add(donneComp);
@@ -110,6 +119,22 @@ public class Main {
 
 //            add autre info
             Cell autreInfoCell = PdfTools.createDivCell("Autres informations", donnescliniquesData);
+            doc.add(autreInfoCell);
+            //  **********************************Promotion2******************************************
+            Table promotion2 = PdfTools.createSection(promotionTitle, true, true);
+            doc.add(promotion2);
+
+            Table table2 = PdfTools.createTableFromModel(tableModel);
+            //            add table
+            doc.add(table2);
+//            add CRO Title
+            Cell cro2 = PdfTools.createDivCell("CRO", maladiesList);
+            doc.add(cro2);
+
+//            add autre info
+            Cell autreInfoCell2 = PdfTools.createDivCell("Autres informations", donnescliniquesData);
+            doc.add(autreInfoCell2);
+
 
 //  **********************************SITES INVISTE  section******************************************
             doc.add(PdfTools.createSection("Sites Inviste", true, false));
@@ -126,13 +151,11 @@ public class Main {
             doc.add(tbl);
 
             Table tableFooter = PdfTools.createTableOneRow(footer);
-            Paragraph p = new Paragraph()
-            PdfTools.addFooter(tableFooter, p
-                    dfDocument , doc );
+            Paragraph p = new Paragraph();
 
 //            add section sites invest
 //            event.writeTotal(pdfDocument);
-
+            pageNo.writeTotal(pdfDocument);
             doc.close();
 
 //            add semi title
@@ -145,4 +168,7 @@ public class Main {
 
 
     }
+
+
+
 }

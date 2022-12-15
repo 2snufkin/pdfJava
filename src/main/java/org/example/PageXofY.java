@@ -13,13 +13,14 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
 
 public class PageXofY implements IEventHandler {
-    protected PdfFormXObject placeholder;
-    protected float side = 20;
-    protected float x = 300;
-    protected float y = 25;
-    protected float space = 4.5f;
-    protected float descent = 3;
-    public PageXofY(PdfDocument pdf) {
+
+ protected PdfFormXObject placeholder;
+protected float side = 20;
+protected float x = 300;
+ protected float y = 25;
+ protected float space = 4.5f;
+ protected float descent = 3;
+ public PageXofY(PdfDocument pdf) {
         placeholder =
                 new PdfFormXObject(new Rectangle(0, 0, side, side));
     }

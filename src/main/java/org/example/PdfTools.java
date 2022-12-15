@@ -18,10 +18,7 @@ import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.border.Border;
 import com.itextpdf.layout.border.GrooveBorder;
-import com.itextpdf.layout.border.SolidBorder;
-import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.layout.property.TextAlignment;
 
 import java.io.FileNotFoundException;
@@ -48,7 +45,6 @@ public class PdfTools implements IEventHandler {
 
         PdfWriter pdfWriter = new PdfWriter(path_pdf);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        pdfDocument.addNewPage();
         return new Document(pdfDocument, PageSize.A4).setFontSize(fontSize);
     }
 

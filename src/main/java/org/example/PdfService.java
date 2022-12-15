@@ -23,6 +23,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
  public class PdfService {
+
+
+
      public static final String font_emb = "emb_fonts/Caveat-Regular.ttf";
 
     public void buildPdfWithList(String path, ArrayList<String> listToAdd) {
@@ -133,6 +136,8 @@ import java.util.ArrayList;
         doc.close();
     }
 
+
+
     public Document createPdfDoc(String path_pdf) throws FileNotFoundException {
 //        FilesMng.createAfile(path_pdf);
         PdfWriter pdfWriter = new PdfWriter(path_pdf);
@@ -179,6 +184,9 @@ import java.util.ArrayList;
 
     }
 
+
+
+
     public Paragraph addTextToParagraph(ArrayList<Text> listofText){
         Paragraph paragraph = new Paragraph();
         for (Text text : listofText){
@@ -186,6 +194,11 @@ import java.util.ArrayList;
         }
         return paragraph;
     }
+
+
+
+
+
 
 
 
@@ -228,6 +241,9 @@ import java.util.ArrayList;
 //    service.buildPdfWithList("list.pdf", arrayList);
 //    service.buildPdfWithImageAndPara("imgPara2.pdf", "this is p", 25, "img/pic.jpg");
     }
+
+
+
 
 }
 
