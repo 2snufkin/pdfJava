@@ -1,15 +1,17 @@
 package org.example;
 
-import com.itextpdf.kernel.events.PdfDocumentEvent;
+import com.itextpdf.kernel.geom.AffineTransform;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.SolidBorder;
-import com.itextpdf.layout.element.AreaBreak;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.properties.AreaBreakType;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class Main {
 
 //        TODO set font
 //        MISE eN PLACE
-        String PATH = "C:\\Users\\Pini\\IdeaProjects\\pdfJava\\test.pdf";
+        String PATH = "C:\\Tech\\code\\Learn\\pdf\\test.pdf";
         String sectionDetails = "Détail de l’étude";
         String etudeName = "Hibiscus(HUB)";
         String donnesCliniqueT = "Données cliniques";
@@ -70,16 +72,15 @@ public class Main {
 
             PdfWriter pdfWriter = new PdfWriter(PATH);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-            Header headerEvent =     new Header("The Strange Case of Dr. Jekyll and Mr. Hyde");
-            PageXofY pageNo =     new PageXofY(pdfDocument);
-            pdfDocument.addEventHandler(PdfDocumentEvent.START_PAGE, headerEvent);
-            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, pageNo);
-            Document doc = new Document(pdfDocument);
+            String study = "Hibiscus";
+            String date = "77/77/77";
+            PageXofY pageNo = new PageXofY(study, date);
+//            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, pageNo);
+            Document doc = new Document(pdfDocument, PageSize.A4, false);
+            doc.setTopMargin(10f);
 
 
 //  **********************************ETUDE  details section******************************************
-
-
 
 
             Table cell = PdfTools.createSection(sectionDetails, true, false);
@@ -93,9 +94,8 @@ public class Main {
 //          Donne clinique title
             Paragraph donneCliniique = PdfTools.createTitleDescription(donnesCliniqueT, "oui");
             doc.add(donneCliniique);
-            doc.add(new AreaBreak());
             //Complem
-            Cell donneComp= PdfTools.createDivCell("Complém", donnescliniquesData);
+            Cell donneComp = PdfTools.createDivCell("Complém", donnescliniquesData);
             doc.add(donneComp);
 
 //          Maladies
@@ -107,12 +107,29 @@ public class Main {
             Cell collectionCell = PdfTools.createDivCell(collectionTitle, arraylistCollection);
             doc.add(collectionCell);
 //  **********************************PROMOTION  section******************************************
-            Table promotion = PdfTools.createSection(promotionTitle, true, true);
-            doc.add(promotion);
 
-            Table table = PdfTools.createTableFromModel(tableModel);
+
+            doc.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+
+
+            Table testRotate = PdfTools.createEmptyTable(5);
+            testRotate.addCell(PdfTools.rotateTableCell90dg(("TTTT")));
+            testRotate.addCell(new Paragraph("Build").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("C").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("D").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("E").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("Header").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("A").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("GRowth").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("H").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("I").setRotationAngle(90 *  Math.PI/180  )) ;
+            testRotate.addCell(new Paragraph("Header").setRotationAngle(90 *  Math.PI/180  )) ;
+
+            Div divT = PdfTools.createRotatedDiv(testRotate);
+            doc.add(divT);
+
+            //
             //            add table
-            doc.add(table);
 //            add CRO Title
             Cell cro = PdfTools.createDivCell("CRO", maladiesList);
             doc.add(cro);
@@ -149,13 +166,13 @@ public class Main {
             Table tbl = new Table(widthTable);
             tbl.addCell(new Cell().setBorder(border));
             doc.add(tbl);
+            ArrayList<String> footers = new ArrayList<String>();
+            footers.add("Hibiscus");
+            footers.add("page");
+            footers.add("22/12/23");
+            PdfTools.addFooter(pdfDocument, footers, doc);
 
-            Table tableFooter = PdfTools.createTableOneRow(footer);
-            Paragraph p = new Paragraph();
-
-//            add section sites invest
-//            event.writeTotal(pdfDocument);
-            pageNo.writeTotal(pdfDocument);
+//            pageNo.writeTotal(pdfDocument);
             doc.close();
 
 //            add semi title
@@ -168,7 +185,6 @@ public class Main {
 
 
     }
-
 
 
 }

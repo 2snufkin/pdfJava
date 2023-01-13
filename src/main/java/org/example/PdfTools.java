@@ -2,37 +2,53 @@ package org.example;
 
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.color.Color;
-import com.itextpdf.kernel.color.DeviceRgb;
-import com.itextpdf.kernel.events.Event;
-import com.itextpdf.kernel.events.IEventHandler;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.geom.PageSize;
-import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants;
-import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
-import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.GrooveBorder;
+import com.itextpdf.layout.Style;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.GrooveBorder;
 import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.VerticalAlignment;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PdfTools implements IEventHandler {
+public class PdfTools {
     public final static DeviceRgb BLUE = new DeviceRgb(25, 118, 210);
     public static final DeviceRgb RED = new DeviceRgb(221, 55, 5);
+    public static final DeviceRgb GRAY = new DeviceRgb(128, 128, 128);
 
     public static final float pageWidth = PageSize.A4.getWidth();
 
 
+    public static void addFooter(PdfDocument pdfDocument, ArrayList<String> footerStrings, Document doc) {
+        int n = pdfDocument.getNumberOfPages();
+        Paragraph footerP;
+        for (int page = 1; page <= n; page++) {
+            String pageS = String.format("Page %s Of %s", page, n);
+            footerP = new Paragraph();
+            Style style = new Style().setPadding(55f);
+            for (String footer : footerStrings) {
+                if (footer == "page") {
+                    Text pageN = new Text(pageS);
+                    footerP.add(pageN);
+                } else {
+                    Text text = new Text(footer).addStyle(style);
+                    footerP.add(text);
+                }
+            }
+            footerP.setFontColor(GRAY).setFontSize(11f);
+            doc.showTextAligned(footerP, 297.5f, 20, page,
+                    TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
+        }
+    }
 
     /**
      * Create a pdf doc with one page and return the document
@@ -47,6 +63,7 @@ public class PdfTools implements IEventHandler {
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
         return new Document(pdfDocument, PageSize.A4).setFontSize(fontSize);
     }
+
 
     /**
      * add all the items in an arrayList to an itext7 List that can be added to a pdf doc as unsorted list
@@ -70,9 +87,9 @@ public class PdfTools implements IEventHandler {
      */
     public static Table createSection(String title, boolean isMain, boolean isMargin) {
         float[] width = {pageWidth};
-        Paragraph paragraph = new Paragraph(title.toUpperCase()).setBold().setMarginLeft(pageWidth/3);
+        Paragraph paragraph = new Paragraph(title.toUpperCase()).setBold().setMarginLeft(pageWidth / 3);
         Table table = new Table(width);
-        if (isMargin){
+        if (isMargin) {
             table.setMarginBottom(10f).setMarginTop(10f);
 
         }
@@ -174,7 +191,8 @@ public class PdfTools implements IEventHandler {
      * @return
      */
     public static Cell createSubSection(String title) {
-        return new Cell().setBackgroundColor(RED).add(title).setFontColor(Color.WHITE);
+        IBlockElement titleB = new Paragraph(title);
+        return new Cell().setBackgroundColor(RED).add(titleB);
     }
 
     /**
@@ -197,6 +215,8 @@ public class PdfTools implements IEventHandler {
      * @param tableModel TablePdf Object (not a native object)
      * @return Table. to add it to the doc. call the add() method
      */
+
+
     public static Table createTableFromModel(TableModel tableModel) {
         List<String> listTitles = new ArrayList<>(tableModel.getTitles());
         int numberOfCol = listTitles.size();
@@ -209,7 +229,8 @@ public class PdfTools implements IEventHandler {
 //      all that is rest to be done is adding Cells
 //      adding the first line of the table == headers
         for (String title : listTitles) {
-            tablePdfObj.addCell(new Cell().add(title).setBold());
+            IBlockElement titleB = new Paragraph(title);
+            tablePdfObj.addCell(new Cell().add(titleB).setBold());
         }
 //        lopping the listTitles of list and adding to the table
         List<ArrayList<String>> listOfList = new ArrayList<>(tableModel.getColumnValues());
@@ -226,44 +247,42 @@ public class PdfTools implements IEventHandler {
      * @param listValues
      * @return a Table
      */
-    public static Table createTableOneRow(ArrayList<String> listValues) {
+    public static Paragraph createParagraphOneRow(ArrayList<String> listValues) {
 //        create a Table object and pass to its constructor the width of each col. as an arg
-        int size = listValues.size();
-        float width = (PageSize.A4.getWidth() / 3);
-        float[] widthtotal = new float[size];
-        for (int i = 0; i < widthtotal.length; i++) {
-            widthtotal[i] = width;
-        }
-        Table table = new Table(widthtotal);
+
+        Paragraph paragraph = new Paragraph();
 //        create Cell Object
         for (String value : listValues) {
-            table.addCell(new Cell().add(value));
+            Style style = new Style().setMargin(5f);
+            Text blockVal = new Text(value).addStyle(style);
+            paragraph.add(blockVal);
         }
-        return table.setBorder(Border.NO_BORDER);
+        return paragraph;
 
     }
+
 
     //    https://kb.itextpdf.com/home/it7kb/examples/page-events-for-headers-and-footers
-    public static void addFooter(Table table, PdfDocument pdfDoc, Document doc) {
-        PdfFormXObject placeholder =  new PdfFormXObject(new Rectangle(0, 0, 20, 20));
-        PageSize ps = pdfDoc.getDefaultPageSize();
-        for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
-            Rectangle pageSize = pdfDoc.getPage(i).getPageSize();
-            float x = pageSize.getWidth() / 2;
-            float y = pageSize.getBottom() + 20;
-            table.setFixedPosition(doc.getLeftMargin(), doc.getBottomMargin(), ps.getWidth() - doc.getLeftMargin() - doc.getRightMargin());
-            PdfPage page  = pdfDoc.getPage(i);
-             PdfCanvas pdfCanvas = new PdfCanvas(
-                    page.getLastContentStream(), page.getResources(), pdfDoc);
-            Canvas canvas = new Canvas(pdfCanvas, pdfDoc, pageSize);
-            Paragraph p = new Paragraph()
-                    .add("Page ").add(String.valueOf(i)).add(" of");
-            canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
-
-            pdfCanvas.addXObject(placeholder, x + 4.5f, y - 3);
-            pdfCanvas.release();
-        }
-    }
+//    public static void addFooter(Table table, PdfDocument pdfDoc, Document doc) {
+//        PdfFormXObject placeholder =  new PdfFormXObject(new Rectangle(0, 0, 20, 20));
+//        PageSize ps = pdfDoc.getDefaultPageSize();
+//        for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
+//            Rectangle pageSize = pdfDoc.getPage(i).getPageSize();
+//            float x = pageSize.getWidth() / 2;
+//            float y = pageSize.getBottom() + 20;
+//            table.setFixedPosition(doc.getLeftMargin(), doc.getBottomMargin(), ps.getWidth() - doc.getLeftMargin() - doc.getRightMargin());
+//            PdfPage page  = pdfDoc.getPage(i);
+//             PdfCanvas pdfCanvas = new PdfCanvas(
+//                    page.getL0stContentStream(), page.getResources(), pdfDoc);
+//            Canvas canvas = new Canvas(pdfCanvas, pdfDoc, pageSize);
+//            Paragraph p = new Paragraph()
+//                    .add("Page ").add(String.valueOf(i)).add(" of");
+//            canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
+//
+//            pdfCanvas.addXObject(placeholder, x + 4.5f, y - 3);
+//            pdfCanvas.release();
+//        }
+//    }
 
 
     /**
@@ -282,9 +301,31 @@ public class PdfTools implements IEventHandler {
         return paragraph;
     }
 
-
-    @Override
-    public void handleEvent(Event event) {
-
+    public static Paragraph rotateTableCell90dg(String cellContent) {
+        return new Paragraph(cellContent).setRotationAngle(90 * Math.PI / 180)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPaddingRight(5f).setPaddingLeft(5f);
     }
+
+    /**
+     * A method to create a Div that get a Table as an argument. Every Cell of the table must contains a Paragraph that was
+     * returned from the function rotateTableCell90dg
+     * @param tabledWithRotatedPara the table to be rotated
+     * @return a 90 degree rotated div that contains the table
+     */
+    public static Div createRotatedDiv(Table tabledWithRotatedPara) {
+        Div divT = new Div();
+        divT.add(tabledWithRotatedPara);
+        divT.setRotationAngle(-Math.PI / 2f);
+        return divT;
+    }
+    public static Table createEmptyTable(int numberOfRow){
+        float[] colWidthArray = new float[numberOfRow];
+        for (int i = 0; i < numberOfRow; i++) {
+            colWidthArray[i] = 200f;
+        }
+        return  new Table(colWidthArray);
+    }
+
+
 }
